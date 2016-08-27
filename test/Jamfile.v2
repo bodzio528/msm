@@ -12,14 +12,21 @@ project msm
     :
     requirements
         <include>.
-       <toolset>gcc:<cxxflags>"-ftemplate-depth-300 -g0"
+       <toolset>gcc:<cxxflags>"-ftemplate-depth-300 -g0 -std=c++14"
        <toolset>darwin:<cxxflags>"-ftemplate-depth-300 -g0"
        <toolset>intel:<cxxflags>"-g0"
+       <toolset>clang:<cxxflags>"-g0 -std=c++14"
        <toolset>gcc:<optimization>off
        <toolset>darwin:<optimization>off
        <toolset>intel:<optimization>off
+       <toolset>clang:<optimization>off
        <library>/boost/test//boost_unit_test_framework/<link>static
        <library>/boost/serialization//boost_serialization/<link>static
+    ;
+
+test-suite msm-unit-tests-visitor
+    :
+    [ run StateVisitor2Arg.cpp ]
     ;
 
 test-suite msm-unit-tests
@@ -30,21 +37,24 @@ test-suite msm-unit-tests
     [ run CompositeMachine.cpp ]
     [ run Constructor.cpp ]
     [ run Entries.cpp ]
+    [ run EventQueue.cpp ]
     [ run History.cpp ]
-    [ run OrthogonalDeferred.cpp ]
     [ run OrthogonalDeferred2.cpp ]
     [ run OrthogonalDeferred3.cpp ]
+    [ run OrthogonalDeferred.cpp ]
     [ run OrthogonalDeferredEuml.cpp ]
-    [ run SimpleEuml.cpp ]
+    [ run Serialize.cpp ]
+    [ run SerializeSimpleEuml.cpp ]
+    [ run SerializeWithHistory.cpp ]
     [ run SimpleEuml2.cpp ]
+    [ run SimpleEuml.cpp ]
     [ run SimpleInternal.cpp ]
     [ run SimpleInternalEuml.cpp ]
     [ run SimpleInternalFunctors.cpp ]
     [ run SimpleMachine.cpp ]
     [ run SimpleWithFunctors.cpp ]
-    [ run Serialize.cpp ]
-    [ run SerializeWithHistory.cpp ]
-    [ run SerializeSimpleEuml.cpp ]
+    [ run Test2RegionsAnonymous.cpp ]
     [ run TestConstructor.cpp ]
+    [ run TestConstructorMovableOnlyTypes.cpp ]
+    [ run TestDeferIn2Regions.cpp ]
     ;
-
