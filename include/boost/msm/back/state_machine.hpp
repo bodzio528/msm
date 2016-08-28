@@ -55,6 +55,7 @@
 #include <boost/msm/active_state_switching_policies.hpp>
 #include <boost/msm/row_tags.hpp>
 #include <boost/msm/msm_grammar.hpp>
+#include <boost/msm/back/args.hpp>
 #include <boost/msm/back/fold_to_list.hpp>
 #include <boost/msm/back/metafunctions.hpp>
 #include <boost/msm/back/history_policies.hpp>
@@ -77,51 +78,6 @@ BOOST_MPL_HAS_XXX_TRAIT_DEF(compile_policy)
 BOOST_MPL_HAS_XXX_TRAIT_DEF(queue_container_policy)
 BOOST_MPL_HAS_XXX_TRAIT_DEF(using_declared_table)
 BOOST_MPL_HAS_XXX_TRAIT_DEF(no_bugfix_wrong_event_order)
-
-namespace boost
-{
-namespace detail
-{
-template <std::size_t I>
-struct placeholder
-{
-};
-}
-}
-
-namespace std
-{
-template <std::size_t I>
-struct is_placeholder<boost::detail::placeholder<I>> : std::integral_constant<int, I>
-{
-};
-}
-
-namespace boost
-{
-namespace msm
-{
-namespace back
-{
-template <typename R, typename... Args>
-struct args
-{
-    typedef std::function<R(Args...)> type;
-
-    constexpr static std::size_t args_number = sizeof...(Args);
-
-    template <typename StateType>
-    using composite_accept_t = void (StateType::*)(Args...);
-
-    template <typename AcceptFun, typename StateType, std::size_t... Ids>
-    static type bind_accept(AcceptFun accept, StateType& astate, std::integer_sequence<std::size_t, Ids...>)
-    {
-        return std::bind(accept, std::ref(astate), boost::detail::placeholder<Ids + 1>{}...);
-    }
-};
-}
-}
-}
 
 namespace boost
 {
@@ -1570,7 +1526,6 @@ public:
         fill_states(this);
     }
 
-
     // assignment operator using the copy policy to decide if non_copyable, shallow or deep copying is necessary
     library_sm& operator=(library_sm const& rhs)
     {
@@ -2405,8 +2360,8 @@ private:
         // this variant is for the direct entry case (just one entry, not a sequence of entries)
         template <class EventType, class FsmType>
         std::enable_if_t<not is_pseudo_entry<typename EventType::active_state>::type::value and
-                             (has_direct_entry<EventType>::type::value and
-                                 not boost::mpl::is_sequence<typename EventType::active_state>::type::value),
+                (has_direct_entry<EventType>::type::value and
+                             not boost::mpl::is_sequence<typename EventType::active_state>::type::value),
             void>
         operator()(EventType const& evt, FsmType& fsm, boost::msm::back::dummy<1> = 0)
         {
@@ -2423,8 +2378,8 @@ private:
         // this variant is for the fork entry case (a sequence on entries)
         template <class EventType, class FsmType>
         std::enable_if_t<not is_pseudo_entry<typename EventType::active_state>::type::value and
-                             (has_direct_entry<EventType>::type::value and
-                                 boost::mpl::is_sequence<typename EventType::active_state>::type::value),
+                (has_direct_entry<EventType>::type::value and
+                             boost::mpl::is_sequence<typename EventType::active_state>::type::value),
             void>
         operator()(EventType const& evt, FsmType& fsm, boost::msm::back::dummy<2> = 0)
         {
@@ -2664,7 +2619,7 @@ private:
     }
     template <class StateType, class TargetType, class EventType, class FsmType>
     static std::enable_if_t<has_explicit_entry_state<TargetType>::type::value or
-                                boost::mpl::is_sequence<TargetType>::value,
+            boost::mpl::is_sequence<TargetType>::value,
         void>
     convert_event_and_execute_entry(
         StateType& astate, EventType const& evt, FsmType& fsm, boost::msm::back::dummy<0> = 0)
@@ -2719,4 +2674,5 @@ private:
 }
 }
 }  // boost::msm::back
+
 #endif  // BOOST_MSM_BACK_STATEMACHINE_H
